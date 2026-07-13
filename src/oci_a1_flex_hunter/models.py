@@ -51,6 +51,7 @@ class HunterState:
     updated_at: str
     retry_token: str | None = None
     retry_token_created_at: str | None = None
+    retry_request_fingerprint: str | None = None
 
     @classmethod
     def create(
@@ -61,16 +62,18 @@ class HunterState:
         *,
         retry_token: str | None = None,
         retry_token_created_at: str | None = None,
+        retry_request_fingerprint: str | None = None,
         now: datetime | None = None,
     ) -> HunterState:
         return cls(
-            schema_version=2,
+            schema_version=3,
             status=status,
             attempts=attempts,
             last_result=last_result,
             updated_at=(now or datetime.now(UTC)).isoformat(),
             retry_token=retry_token,
             retry_token_created_at=retry_token_created_at,
+            retry_request_fingerprint=retry_request_fingerprint,
         )
 
     def to_dict(self) -> dict[str, Any]:

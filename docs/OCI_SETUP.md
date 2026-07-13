@@ -65,7 +65,7 @@ OCI_A1_HUNTER_STATE_DIR=/protected/state/a1-target-primary
 OCI_A1_HUNTER_LOG_LEVEL=INFO
 ```
 
-Load it into a trusted shell without executing unrelated content:
+Shell sourcing executes shell syntax. Use it only for an environment file that the operator created, owns, restricted to mode `0600`, and reviewed in full; sourcing an untrusted or unreviewed file can execute arbitrary commands.
 
 ```bash
 set -a

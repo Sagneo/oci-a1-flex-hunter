@@ -114,6 +114,7 @@ def _print_state(store: StateStore) -> None:
     else:
         payload = state.to_dict()
         payload["retry_token_active"] = bool(payload.pop("retry_token"))
+        payload["retry_intent_bound"] = bool(payload.pop("retry_request_fingerprint"))
         print(json.dumps(payload, sort_keys=True))
 
 
@@ -140,6 +141,7 @@ def main(
             return int(ExitCode.SUCCESS)
 
         if args.command == "check" or (args.command == "status" and args.refresh):
+            config.validate_oci_profile(profile_loader)
             adapter = adapter_factory(config)
             exists = adapter.matching_instance_exists(config)
             print(
@@ -160,7 +162,7 @@ def main(
             signal.signal(signal.SIGINT, request_shutdown)
             signal.signal(signal.SIGTERM, request_shutdown)
 
-            max_attempts = args.max_attempts or config.max_attempts
+            max_attempts = config.max_attempts if args.max_attempts is None else args.max_attempts
             min_delay = config.min_delay if args.min_delay is None else args.min_delay
             max_delay = config.max_delay if args.max_delay is None else args.max_delay
             options = RunOptions(
@@ -170,6 +172,9 @@ def main(
                 min_delay=min_delay,
                 max_delay=max_delay,
             )
+            Hunter.validate_options(options)
+            if args.live:
+                config.validate_oci_profile(profile_loader)
             store = StateStore(config.state_dir)
             lock = ProcessLock(config.state_dir / "hunter.lock")
             with lock:

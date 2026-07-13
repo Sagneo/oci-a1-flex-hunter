@@ -5,7 +5,9 @@ All notable changes are documented here.
 ## 0.1.1 — Unreleased
 
 - Reuse and persist a bounded OCI retry token across ambiguous launch failures and process restarts.
+- Bind persisted retry intent to a canonical launch-request fingerprint and preserve it across preflight failures.
 - Add offline SDK-profile, signing-key-permission, and SSH public-key validation.
+- Enforce offline profile validation before every network-capable command and reject explicit invalid retry limits.
 - Add direct production-adapter payload and error-translation tests; raise coverage above 90% with 100% controller safety-path coverage.
 - Add complete OCI Console onboarding, conservative current 2-OCPU/12-GB guidance, and historical/account-specific 4-OCPU/24-GB context.
 - Replace restart-driven hunting guidance with reviewed bounded one-shot and per-target systemd timer examples.

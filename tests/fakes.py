@@ -11,9 +11,11 @@ class FakeAdapter:
         self,
         *,
         existing: bool = False,
+        check_results: Sequence[HunterError | bool] = (),
         launch_results: Sequence[HunterError | None] = (),
     ) -> None:
         self.existing = existing
+        self.check_results = list(check_results)
         self.launch_results = list(launch_results)
         self.check_calls = 0
         self.launch_calls = 0
@@ -22,7 +24,10 @@ class FakeAdapter:
     def matching_instance_exists(self, config: HunterConfigProtocol) -> bool:
         del config
         self.check_calls += 1
-        return self.existing
+        result = self.check_results.pop(0) if self.check_results else self.existing
+        if isinstance(result, HunterError):
+            raise result
+        return result
 
     def launch_instance(self, config: HunterConfigProtocol, retry_token: str) -> LaunchResult:
         del config

@@ -179,3 +179,13 @@
 - **Unresolved issue:** The first dependency audit found vulnerable clean-room bootstrap pip and a vulnerable pytest selected by the old dev upper bound; both required bounded dependency-tooling updates before publication.
 - **Rollback state:** Changes are isolated to branch `audit/v0.1.1` and can be reverted without cloud or host rollback.
 - **Next bounded step:** Complete clean-room/security validation, push only this branch, and open a draft PR.
+
+## 2026-07-13T18:00:00-07:00 — PR #1 idempotency corrections
+
+- **Objective:** Bind every persisted retry intent to the exact launch request and close the final offline-validation and retry-limit gaps identified during review.
+- **Action:** Added a canonical SHA-256 launch-request fingerprint without persisting raw request data, fail-closed mismatch and malformed-state handling, preservation of recovered intent across pre-submission failures, definitive post-submission cleanup rules, explicit zero-value retry validation, and offline OCI-profile validation before every network-capable command. Expanded controller, CLI, persistence, adapter-boundary, and documentation coverage.
+- **Result:** The local suite passes 124 tests at 93.85% total coverage, with 100% line coverage for both the controller and production adapter; Ruff and strict mypy pass. No OCI API call, credential access, service action, host installation, merge, tag, release, or `main` update occurred.
+- **Validation evidence:** Deterministic fakes exercise matching/mismatching fingerprints, restart reuse, pre- and post-submission failures, expiry, malformed state, `--max-attempts` zero/negative/default behavior, and offline profile gates before adapter construction.
+- **Unresolved issue:** Clean-wheel, final secret/dependency scans, branch push, and the Python 3.11/3.12 draft-PR CI matrix remain pending at this checkpoint.
+- **Rollback state:** All corrections remain uncommitted and isolated to `audit/v0.1.1`; the published `main` branch and v0.1.0 release are unchanged.
+- **Next bounded step:** Validate the exact candidate tree in clean environments, commit and push only `audit/v0.1.1`, then require PR #1 CI success while preserving draft status.

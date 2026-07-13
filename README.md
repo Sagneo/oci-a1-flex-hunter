@@ -17,7 +17,7 @@ As reviewed on 2026-07-13, Oracle's specific [Always Free Resources](https://doc
 - Duplicate identity requires both a stable display name and project tag.
 - Sequential, bounded retries with configurable jitter.
 - Capacity and transient failures are separated from fatal failures.
-- Local process lock and atomic, sanitized JSON state with bounded retry-token recovery.
+- Local process lock and atomic, sanitized JSON state with request-bound retry-token recovery.
 - Structured console logs with sensitive-value redaction.
 - One-shot and bounded continuous operation.
 - Official OCI Python SDK adapter with fully offline fake-adapter tests.
@@ -25,7 +25,7 @@ As reviewed on 2026-07-13, Oracle's specific [Always Free Resources](https://doc
 
 ## Architecture
 
-The CLI validates configuration and coordinates a controller. The controller owns stop/retry policy and depends on a narrow compute-adapter protocol. Production uses the official OCI SDK; tests use a deterministic fake. Local locking prevents concurrent processes, while an atomic state file records sanitized status plus a non-secret retry intent when an OCI result is ambiguous.
+The CLI validates configuration and coordinates a controller. The controller owns stop/retry policy and depends on a narrow compute-adapter protocol. Production uses the official OCI SDK; tests use a deterministic fake. Local locking prevents concurrent processes, while an atomic state file records sanitized status plus a non-secret retry token bound to a canonical launch-request fingerprint when an OCI result is ambiguous.
 
 See [Architecture](docs/ARCHITECTURE.md) for the detailed control flow and trust boundaries. First-time operators should follow [OCI onboarding](docs/OCI_SETUP.md) before configuration.
 
