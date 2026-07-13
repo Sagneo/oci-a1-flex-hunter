@@ -8,10 +8,9 @@ python -m compileall src tests
 ruff format --check .
 ruff check .
 mypy src
-python -m pytest
+python -m pytest --cov=oci_a1_flex_hunter --cov-fail-under=90
 ```
 
-Coverage includes configuration success/failure, dry-run gating, live single-call behavior through a fake, display-name/tag matching, retryable capacity behavior, fatal errors, attempt exhaustion, jitter boundaries, lock contention, atomic state, state readback, log redaction, CLI exit codes, and shutdown behavior.
+Coverage includes offline OCI-profile validation, production launch-payload propagation, every translated SDK error category, dry-run gating, 100% of controller live safety decisions, stable ambiguous retry tokens, bounded token recovery/expiry, duplicate matching, lock/state behavior, redaction, exit codes, and deterministic shutdown.
 
 GitHub Actions runs the same offline checks on supported Python versions. Do not add credentials, live SDK calls, or cloud mutation tests to CI.
-

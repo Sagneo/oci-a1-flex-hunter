@@ -23,7 +23,7 @@ python3 -m venv .venv
 .venv/bin/oci-a1-flex-hunter --help
 ```
 
-Create the protected environment file from documented variable names, never by copying repository examples with live values back into Git.
+Create the protected environment file from documented variable names, never by copying repository examples with live values back into Git. Complete [OCI onboarding](OCI_SETUP.md) first.
 
 ## Validate before service use
 
@@ -37,15 +37,16 @@ Run as the dedicated identity:
 
 The final command is a dry-run. Review the sample unit before adding `--live`; live mode can create a chargeable resource.
 
-## systemd example
+## systemd examples
 
-The file under `examples/` is a template requiring administrator review. It uses explicit paths, protected external environment loading, bounded restart behavior, and hardening. Verify it with `systemd-analyze verify` in the target environment before installation.
+The files under `examples/` require administrator review. The service is `Type=oneshot`; every process has five bounded internal attempts. The timer, not an infinite process or `Restart=`, schedules a later run. Examples default to dry-run. Inspect paths, permissions, resource profile, state isolation, and all three validation commands before deliberately adding `--live`.
+
+For multiple targets, use `oci-a1-flex-hunter@target-a.timer` and `@target-b.timer`. The `%i` service name selects `/etc/oci-a1-flex-hunter/%i.env`, and each environment must set a matching unique `/var/lib/oci-a1-flex-hunter/%i` state directory. The project neither installs nor enables these units.
 
 ## Operations
 
-Use the CLI `status` command and bounded journald queries. A successful launch exits normally. Expected configuration, lock, retry-exhaustion, and OCI fatal exit codes are excluded from automatic restart in the example unit.
+Use the CLI `status` command, `systemctl list-timers`, and bounded journald queries. A successful launch exits normally. Retry exhaustion is an expected end of one bounded process; the reviewed timer controls the next opportunity.
 
 ## Update and rollback
 
 Install and validate a new version separately before replacing the active application directory. Preserve the prior release and protected configuration until the new version passes dry-run and read-only checks. Rollback changes only the installed application version; never rotate credentials or modify OCI resources as part of an application rollback.
-

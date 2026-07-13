@@ -50,5 +50,8 @@ A duplicate match requires the configured display name and the free-form tag key
 
 ## Idempotency and concurrency
 
-Each launch call supplies an SDK retry token. The local lock prevents concurrent processes on one host, and the cloud-side display-name/tag lookup runs before every attempt. Multi-host coordination is not provided.
+Oracle documents `opc_retry_token` as the identity of one request retry, with a 24-hour lifetime, so a timeout or server error can be retried without executing the action twice. The controller binds each token to a SHA-256 fingerprint of canonical launch fields and the SSH public-key content digest, writes all three intent fields before submission, and reuses them only for the identical logical request. Raw identifiers, paths, SSH content, and payloads are never stored in intent state.
 
+A matching non-expired fingerprint recovers the token after ambiguous transient failures and bounded process restarts. A changed request, missing fingerprint, malformed timestamp, or incomplete intent fails closed. An expired structurally valid intent permits a new token only after duplicate preflight. Preflight failures preserve recovered intent because they cannot resolve an earlier ambiguous submission. Post-submission authentication, authorization, malformed-request, and `OutOfHostCapacity` rejections clear the complete intent; transient and unknown post-submission results retain it.
+
+The token and fingerprint are non-secret digests/identifiers, stored in the mode-`0600` state file but redacted from `status` output. The local lock prevents concurrent processes on one host, and the cloud-side display-name/tag lookup runs before every attempt. Multi-host coordination is not provided, so separate targets must use separate state directories.

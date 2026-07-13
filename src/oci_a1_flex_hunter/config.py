@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import os
 import re
-from collections.abc import Mapping
+import stat
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from math import isfinite
 from pathlib import Path
 
 from .errors import ConfigurationError
@@ -13,6 +15,14 @@ from .errors import ConfigurationError
 PREFIX = "OCI_A1_HUNTER_"
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,62}$")
 LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+OCI_REQUIRED_FIELDS = {"user", "fingerprint", "key_file", "tenancy", "region"}
+SSH_PUBLIC_KEY_TYPES = (
+    "ssh-ed25519",
+    "ssh-rsa",
+    "ecdsa-sha2-",
+    "sk-ssh-ed25519@",
+    "sk-ecdsa-sha2-",
+)
 
 
 def _required(values: Mapping[str, str], name: str) -> str:
@@ -109,18 +119,28 @@ class HunterConfig:
         )
         if any(not value.strip() for value in required_text):
             raise ConfigurationError("A required identifier or profile is empty")
-        if self.ocpus <= 0 or self.memory_gb <= 0:
-            raise ConfigurationError("OCPU and memory values must be positive")
+        if (
+            not isfinite(self.ocpus)
+            or not isfinite(self.memory_gb)
+            or self.ocpus <= 0
+            or self.memory_gb <= 0
+        ):
+            raise ConfigurationError("OCPU and memory values must be finite and positive")
         if self.max_attempts < 1:
             raise ConfigurationError("Maximum attempts must be at least one")
-        if self.min_delay < 0 or self.max_delay < self.min_delay:
+        if (
+            not isfinite(self.min_delay)
+            or not isfinite(self.max_delay)
+            or self.min_delay < 0
+            or self.max_delay < self.min_delay
+        ):
             raise ConfigurationError("Retry delays must be nonnegative and correctly ordered")
         if not SAFE_NAME.fullmatch(self.display_name):
             raise ConfigurationError("Display name has an unsafe format")
         if not SAFE_NAME.fullmatch(self.project_tag):
             raise ConfigurationError("Project tag has an unsafe format")
-        if not self.shape:
-            raise ConfigurationError("Shape is required")
+        if self.shape != "VM.Standard.A1.Flex":
+            raise ConfigurationError("Only the VM.Standard.A1.Flex shape is supported")
         if self.boot_volume_size_gb is not None and self.boot_volume_size_gb <= 0:
             raise ConfigurationError("Boot volume size must be positive")
         if self.log_level not in LOG_LEVELS:
@@ -130,3 +150,50 @@ class HunterConfig:
                 raise ConfigurationError("OCI config file does not exist")
             if not self.ssh_public_key_path.is_file():
                 raise ConfigurationError("SSH public-key file does not exist")
+            try:
+                public_key = self.ssh_public_key_path.read_text(encoding="utf-8").strip()
+            except (OSError, UnicodeError) as exc:
+                raise ConfigurationError("SSH public-key file cannot be read safely") from exc
+            fields = public_key.split()
+            if (
+                len(fields) < 2
+                or not fields[0].startswith(SSH_PUBLIC_KEY_TYPES)
+                or not re.fullmatch(r"[A-Za-z0-9+/]+={0,3}", fields[1])
+            ):
+                raise ConfigurationError("SSH public-key file is not a plausible public key")
+
+    def validate_oci_profile(
+        self,
+        loader: Callable[[str, str], Mapping[str, object]] | None = None,
+    ) -> None:
+        """Validate the selected SDK profile and signing key without a network call."""
+        if loader is None:
+            try:
+                import oci
+
+                profile = oci.config.from_file(
+                    file_location=str(self.oci_config_file), profile_name=self.oci_profile
+                )
+            except Exception as exc:
+                raise ConfigurationError("Selected OCI profile is missing or invalid") from exc
+        else:
+            try:
+                profile = loader(str(self.oci_config_file), self.oci_profile)
+            except Exception as exc:
+                raise ConfigurationError("Selected OCI profile is missing or invalid") from exc
+
+        if not isinstance(profile, Mapping):
+            raise ConfigurationError("Selected OCI profile is missing or invalid")
+        missing = OCI_REQUIRED_FIELDS.difference(profile)
+        if missing or any(not str(profile[name]).strip() for name in OCI_REQUIRED_FIELDS):
+            raise ConfigurationError("Selected OCI profile lacks required SDK fields")
+
+        signing_key = Path(str(profile["key_file"])).expanduser()
+        try:
+            key_stat = signing_key.stat()
+        except OSError as exc:
+            raise ConfigurationError("OCI signing-key file does not exist") from exc
+        if not stat.S_ISREG(key_stat.st_mode):
+            raise ConfigurationError("OCI signing-key path is not a regular file")
+        if stat.S_IMODE(key_stat.st_mode) & 0o077:
+            raise ConfigurationError("OCI signing-key permissions allow group or other access")

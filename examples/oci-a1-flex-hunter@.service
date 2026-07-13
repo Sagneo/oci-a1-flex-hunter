@@ -1,6 +1,6 @@
-# Example only. It defaults to dry-run. Review before installation or adding --live.
+# Example only. Instance %i selects a protected environment and isolated state directory.
 [Unit]
-Description=OCI A1 Flex Hunter bounded one-shot
+Description=OCI A1 Flex Hunter target %i
 After=network-online.target
 Wants=network-online.target
 
@@ -9,7 +9,7 @@ Type=oneshot
 User=oci-a1-hunter
 Group=oci-a1-hunter
 WorkingDirectory=/opt/oci-a1-flex-hunter
-EnvironmentFile=/etc/oci-a1-flex-hunter/hunter.env
+EnvironmentFile=/etc/oci-a1-flex-hunter/%i.env
 ExecStart=/opt/oci-a1-flex-hunter/.venv/bin/oci-a1-flex-hunter run --continuous --max-attempts 5
 TimeoutStartSec=20min
 UMask=0077
@@ -26,6 +26,6 @@ RestrictRealtime=true
 LockPersonality=true
 MemoryDenyWriteExecute=true
 RestrictAddressFamilies=AF_INET AF_INET6
-ReadWritePaths=/var/lib/oci-a1-flex-hunter
+ReadWritePaths=/var/lib/oci-a1-flex-hunter/%i
 
-# Deliberately no [Install] section: use the reviewed timer for periodic execution.
+# Deliberately no [Install] section: enable only the paired timer after review.

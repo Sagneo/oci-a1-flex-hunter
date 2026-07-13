@@ -12,7 +12,7 @@ def config(tmp_path: Path) -> HunterConfig:
     oci_config = tmp_path / "oci-config"
     ssh_key = tmp_path / "id_test.pub"
     oci_config.write_text("[DEFAULT]\n", encoding="utf-8")
-    ssh_key.write_text("synthetic-public-key\n", encoding="utf-8")
+    ssh_key.write_text("ssh-ed25519 AAAA synthetic-test\n", encoding="utf-8")
     return HunterConfig.from_environment(
         {
             "OCI_CONFIG": str(oci_config),
