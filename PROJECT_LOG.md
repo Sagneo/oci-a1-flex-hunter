@@ -149,3 +149,13 @@
 - **Unresolved issue:** Annotated tag and GitHub release remained pending.
 - **Rollback state:** `main` remained the only branch and the remote owner/name remained exact.
 - **Next bounded step:** Commit this release-candidate record, require final `main` CI, then create and verify `v0.1.0`.
+
+## 2026-07-13T15:20:00-07:00 — v0.1.0 publication
+
+- **Objective:** Publish and verify the first greenfield release.
+- **Action:** Required final `main` CI success, created annotated tag `v0.1.0`, pushed the tag, created the GitHub release, and watched the tag-triggered matrix.
+- **Result:** The public release exists at the approved Sagneo repository and tag CI passed on Python 3.11 and 3.12.
+- **Validation evidence:** Final pre-tag `main` run `29285998606` and tag run `29286063723` completed successfully for every required job.
+- **Unresolved issue:** Dedicated secret-scanner tooling was unavailable; bounded regex, filename, working-tree, and history audits are the documented fallback.
+- **Rollback state:** The immutable release identifies the locally validated release-candidate commit; no OCI or host deployment action occurred.
+- **Next bounded step:** Push this chronological publication record, require final `main` CI, and complete remote/source/history verification.
