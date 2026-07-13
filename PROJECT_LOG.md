@@ -129,3 +129,13 @@
 - **Unresolved issue:** Remote name availability, organization permission, Actions, tag, and release remained pending.
 - **Rollback state:** No remote existed and all Git metadata was confined to this project.
 - **Next bounded step:** Commit this log entry, verify remote availability, and publish only to `Sagneo/oci-a1-flex-hunter`.
+
+## 2026-07-13T15:00:00-07:00 — Initial publication and CI review
+
+- **Objective:** Publish `main` to the exact approved public owner/name and inspect initial CI.
+- **Action:** Verified the authenticated owner, confirmed the repository name was unused, created the public repository, set `origin`, pushed `main`, confirmed the default branch, and watched both CI matrix jobs.
+- **Result:** Initial CI passed on Python 3.11 and 3.12. GitHub emitted Node runtime deprecation annotations for the older workflow action majors.
+- **Validation evidence:** Every install, compile, format, lint, type, test, and CLI smoke step passed in both jobs.
+- **Unresolved issue:** The workflow annotations should be removed before the release tag.
+- **Rollback state:** The remote exists only at the approved public Sagneo URL; no alternative owner or cloud resource was used.
+- **Next bounded step:** Update to the current official checkout and setup-python majors, rerun CI, then record publication and tag the passing commit.
