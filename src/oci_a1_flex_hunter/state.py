@@ -44,4 +44,8 @@ class StateStore:
             attempts=int(raw["attempts"]),
             last_result=str(raw["last_result"]),
             updated_at=str(raw["updated_at"]),
+            retry_token=(str(raw["retry_token"]) if raw.get("retry_token") else None),
+            retry_token_created_at=(
+                str(raw["retry_token_created_at"]) if raw.get("retry_token_created_at") else None
+            ),
         )

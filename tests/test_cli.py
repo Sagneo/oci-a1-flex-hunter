@@ -5,16 +5,28 @@ from pathlib import Path
 import pytest
 
 from oci_a1_flex_hunter.cli import main
-from oci_a1_flex_hunter.models import ExitCode
+from oci_a1_flex_hunter.models import ExitCode, HunterState
+from oci_a1_flex_hunter.state import StateStore
 
 from .fakes import FakeAdapter
 
 
 def config_args(tmp_path: Path) -> list[str]:
     oci_config = tmp_path / "oci-config"
+    signing_key = tmp_path / "signing.pem"
     ssh_key = tmp_path / "test.pub"
-    oci_config.write_text("[DEFAULT]\n", encoding="utf-8")
-    ssh_key.write_text("synthetic-public-key\n", encoding="utf-8")
+    signing_key.write_text("synthetic signing fixture\n", encoding="utf-8")
+    signing_key.chmod(0o600)
+    oci_config.write_text(
+        "[DEFAULT]\n"
+        "user=user-test\n"
+        "fingerprint=fingerprint-test\n"
+        f"key_file={signing_key}\n"
+        "tenancy=tenancy-test\n"
+        "region=region-test-1\n",
+        encoding="utf-8",
+    )
+    ssh_key.write_text("ssh-ed25519 AAAA synthetic-test\n", encoding="utf-8")
     return [
         "--oci-config",
         str(oci_config),
@@ -46,7 +58,20 @@ def test_help(command: str | None) -> None:
 
 
 def test_validate_config_success(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    assert main(["validate-config", *config_args(tmp_path)]) == ExitCode.SUCCESS
+    args = config_args(tmp_path)
+    signing_key = tmp_path / "signing.pem"
+
+    def loader(path: str, profile: str) -> dict[str, object]:
+        del path, profile
+        return {
+            "user": "user-test",
+            "fingerprint": "fingerprint-test",
+            "key_file": str(signing_key),
+            "tenancy": "tenancy-test",
+            "region": "region-test-1",
+        }
+
+    assert main(["validate-config", *args], profile_loader=loader) == ExitCode.SUCCESS
     assert "no OCI request" in capsys.readouterr().out
 
 
@@ -92,3 +117,20 @@ def test_status_does_not_contact_adapter(tmp_path: Path) -> None:
         adapter_factory=forbidden_factory,
     )
     assert result == ExitCode.SUCCESS
+
+
+def test_status_redacts_retry_token(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    state_dir = tmp_path / "state"
+    StateStore(state_dir).write(
+        HunterState.create(
+            "waiting",
+            1,
+            "transient-service-error",
+            retry_token="sensitive-test-token",
+            retry_token_created_at="2026-07-13T00:00:00+00:00",
+        )
+    )
+    assert main(["status", "--state-dir", str(state_dir)]) == ExitCode.SUCCESS
+    output = capsys.readouterr().out
+    assert "sensitive-test-token" not in output
+    assert '"retry_token_active": true' in output

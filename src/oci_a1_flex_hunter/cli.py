@@ -8,7 +8,7 @@ import os
 import signal
 import sys
 import threading
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +22,7 @@ from .oci_adapter import OCIComputeAdapter
 from .state import StateStore
 
 AdapterFactory = Callable[[HunterConfig], ComputeAdapter]
+ProfileLoader = Callable[[str, str], Mapping[str, object]]
 
 
 def _add_config_arguments(parser: argparse.ArgumentParser) -> None:
@@ -111,13 +112,16 @@ def _print_state(store: StateStore) -> None:
     if state is None:
         print(json.dumps({"status": "no-state"}, sort_keys=True))
     else:
-        print(json.dumps(state.to_dict(), sort_keys=True))
+        payload = state.to_dict()
+        payload["retry_token_active"] = bool(payload.pop("retry_token"))
+        print(json.dumps(payload, sort_keys=True))
 
 
 def main(
     argv: Sequence[str] | None = None,
     *,
     adapter_factory: AdapterFactory = OCIComputeAdapter,
+    profile_loader: ProfileLoader | None = None,
 ) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -131,6 +135,7 @@ def main(
         logger = configure_logging(config.log_level)
 
         if args.command == "validate-config":
+            config.validate_oci_profile(profile_loader)
             print("Configuration is valid; no OCI request was made.")
             return int(ExitCode.SUCCESS)
 

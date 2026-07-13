@@ -33,7 +33,15 @@ jobs:
       - name: Type check
         run: mypy src
       - name: Test
-        run: python -m pytest
+        run: python -m pytest --cov=oci_a1_flex_hunter --cov-fail-under=90
+      - name: Build distributions
+        run: python -m build
+      - name: Clean wheel smoke test
+        run: |
+          python -m venv /tmp/oci-a1-wheel
+          /tmp/oci-a1-wheel/bin/python -m pip install --upgrade pip
+          /tmp/oci-a1-wheel/bin/python -m pip install dist/*.whl
+          /tmp/oci-a1-wheel/bin/oci-a1-flex-hunter --help
       - name: CLI smoke tests
         run: |
           oci-a1-flex-hunter --help

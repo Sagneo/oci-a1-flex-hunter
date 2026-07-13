@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import Any, NoReturn
-from uuid import uuid4
 
 from .config import HunterConfig
 from .errors import (
@@ -53,7 +52,7 @@ class OCIComputeAdapter:
             and instance.lifecycle_state in MATCHING_STATES
         )
 
-    def launch_instance(self, config: HunterConfigProtocol) -> LaunchResult:
+    def launch_instance(self, config: HunterConfigProtocol, retry_token: str) -> LaunchResult:
         ssh_key = config.ssh_public_key_path.read_text(encoding="utf-8").strip()
         source_kwargs: dict[str, Any] = {
             "source_type": "image",
@@ -80,7 +79,9 @@ class OCIComputeAdapter:
         try:
             self._client.launch_instance(
                 launch_instance_details=details,
-                opc_retry_token=str(uuid4()),
+                # OCI documents a 24-hour retry-token lifetime. The controller owns
+                # this token so every retry of one logical submission reuses it.
+                opc_retry_token=retry_token,
             )
         except Exception as exc:
             self._raise_translated(exc)

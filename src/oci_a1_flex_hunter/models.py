@@ -49,15 +49,28 @@ class HunterState:
     attempts: int
     last_result: str
     updated_at: str
+    retry_token: str | None = None
+    retry_token_created_at: str | None = None
 
     @classmethod
-    def create(cls, status: str, attempts: int, last_result: str) -> HunterState:
+    def create(
+        cls,
+        status: str,
+        attempts: int,
+        last_result: str,
+        *,
+        retry_token: str | None = None,
+        retry_token_created_at: str | None = None,
+        now: datetime | None = None,
+    ) -> HunterState:
         return cls(
-            schema_version=1,
+            schema_version=2,
             status=status,
             attempts=attempts,
             last_result=last_result,
-            updated_at=datetime.now(UTC).isoformat(),
+            updated_at=(now or datetime.now(UTC)).isoformat(),
+            retry_token=retry_token,
+            retry_token_created_at=retry_token_created_at,
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -102,4 +115,4 @@ class HunterConfigProtocol(Protocol):
 class ComputeAdapter(Protocol):
     def matching_instance_exists(self, config: HunterConfigProtocol) -> bool: ...
 
-    def launch_instance(self, config: HunterConfigProtocol) -> LaunchResult: ...
+    def launch_instance(self, config: HunterConfigProtocol, retry_token: str) -> LaunchResult: ...
