@@ -1,0 +1,37 @@
+# Example only. Review all paths, permissions, limits, and live-mode risk before installation.
+[Unit]
+Description=OCI A1 Flex Hunter
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=900
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=oci-a1-hunter
+Group=oci-a1-hunter
+WorkingDirectory=/opt/oci-a1-flex-hunter
+EnvironmentFile=/etc/oci-a1-flex-hunter/hunter.env
+ExecStart=/opt/oci-a1-flex-hunter/.venv/bin/oci-a1-flex-hunter run --live --continuous
+Restart=on-failure
+RestartSec=60
+RestartPreventExitStatus=2 3 4 5 6 130
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictAddressFamilies=AF_INET AF_INET6
+ReadWritePaths=/var/lib/oci-a1-flex-hunter
+
+[Install]
+WantedBy=multi-user.target
+
