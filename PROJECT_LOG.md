@@ -119,3 +119,13 @@
 - **Unresolved issue:** Regex scanning cannot prove absence of every possible secret format; manual review of examples and configuration names remains part of the release audit.
 - **Rollback state:** Git was still uninitialized and all work remained project-local.
 - **Next bounded step:** Rerun final local validation, initialize Git on `main`, and create focused commits.
+
+## 2026-07-13T14:50:00-07:00 — Repository initialization
+
+- **Objective:** Create an independent, reviewable Git history only inside the project.
+- **Action:** Initialized Git on `main`, confirmed the complete 41-file intended set, configured the authenticated Sagneo no-reply commit identity locally, staged explicit scopes, and created focused planning, implementation, test, documentation, and CI commits.
+- **Result:** The local repository has five focused commits and a clean working tree; the umbrella workspace remains non-Git.
+- **Validation evidence:** Commit subjects are recorded by Git history and ignored project-local artifacts were not staged.
+- **Unresolved issue:** Remote name availability, organization permission, Actions, tag, and release remained pending.
+- **Rollback state:** No remote existed and all Git metadata was confined to this project.
+- **Next bounded step:** Commit this log entry, verify remote availability, and publish only to `Sagneo/oci-a1-flex-hunter`.
