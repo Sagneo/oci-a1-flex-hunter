@@ -139,3 +139,13 @@
 - **Unresolved issue:** The workflow annotations should be removed before the release tag.
 - **Rollback state:** The remote exists only at the approved public Sagneo URL; no alternative owner or cloud resource was used.
 - **Next bounded step:** Update to the current official checkout and setup-python majors, rerun CI, then record publication and tag the passing commit.
+
+## 2026-07-13T15:10:00-07:00 — Release-candidate validation
+
+- **Objective:** Remove platform warnings and establish the release candidate on supported workflow runtimes.
+- **Action:** Verified current official action releases, updated checkout and setup-python majors, reran local Ruff, mypy, and 46 tests, pushed the correction, and watched the complete remote matrix.
+- **Result:** GitHub Actions passed on Python 3.11 and 3.12 with all required steps and without the prior Node runtime annotations.
+- **Validation evidence:** Remote Actions run `29285901406` completed successfully for both matrix jobs.
+- **Unresolved issue:** Annotated tag and GitHub release remained pending.
+- **Rollback state:** `main` remained the only branch and the remote owner/name remained exact.
+- **Next bounded step:** Commit this release-candidate record, require final `main` CI, then create and verify `v0.1.0`.
