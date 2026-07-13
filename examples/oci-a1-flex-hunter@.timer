@@ -1,0 +1,13 @@
+# Example only. The timer schedules future bounded processes; it never contains credentials.
+[Unit]
+Description=Periodically run OCI A1 Flex Hunter target %i
+
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=15min
+RandomizedDelaySec=2min
+Persistent=true
+Unit=oci-a1-flex-hunter@%i.service
+
+[Install]
+WantedBy=timers.target

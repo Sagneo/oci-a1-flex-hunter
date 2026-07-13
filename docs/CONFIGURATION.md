@@ -1,6 +1,6 @@
 # Configuration
 
-The CLI combines process environment variables with explicit CLI overrides. It does not parse `.env` files automatically. Keep the live environment file, standard OCI config, signing key, and SSH public key outside the repository with restrictive permissions.
+The CLI combines process environment variables with explicit CLI overrides. It does not parse `.env` files automatically. Keep the live environment file, standard OCI config, signing key, and SSH public key outside the repository with restrictive permissions. Follow [OCI onboarding](OCI_SETUP.md) for first-time Console setup and the two distinct key pairs.
 
 | Environment variable | CLI option | Purpose | Default |
 | --- | --- | --- | --- |
@@ -31,4 +31,4 @@ OCPU and memory defaults are examples, not a statement of price or eligibility. 
 
 The shape profile remains configurable because paid accounts and account-specific entitlements can differ. A historical 4-OCPU/24-GB allocation could be one 4/24 instance or several smaller instances, but the Oracle Always Free resource page reviewed on 2026-07-13 instead publishes a 2-OCPU/12-GB total and describes one 2-OCPU instance or two 1-OCPU instances. Oracle pages are not fully consistent, and block-volume usage also constrains instance count. Treat the account Console and current Oracle terms as authoritative; the application never labels a configured profile as free.
 
-Use `oci-a1-flex-hunter validate-config` before `check`, and use `check` before any manually approved live run.
+Use `oci-a1-flex-hunter validate-config` before `check`, and use `check` before any manually approved live run. Each target requires its own protected environment, unique display name/tag, and separate state directory; see [OCI onboarding](OCI_SETUP.md#configure-two-targets-without-pretending-they-are-one).

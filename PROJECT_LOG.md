@@ -159,3 +159,23 @@
 - **Unresolved issue:** Dedicated secret-scanner tooling was unavailable; bounded regex, filename, working-tree, and history audits are the documented fallback.
 - **Rollback state:** The immutable release identifies the locally validated release-candidate commit; no OCI or host deployment action occurred.
 - **Next bounded step:** Push this chronological publication record, require final `main` CI, and complete remote/source/history verification.
+
+## 2026-07-13T17:00:00-07:00 — v0.1.1 independent audit
+
+- **Objective:** Independently audit the published `v0.1.0` tree and establish a clean-room baseline before edits.
+- **Action:** Inspected all tracked files, release metadata, complete history, workflow, package, tests, documentation, and systemd example; exported `09cfec25a0ede2e663f22ee06c94dd45d52e8913` with `git archive` into a disposable sandbox.
+- **Result:** No blocker or secret was found. One high-severity ambiguous-retry risk and five medium onboarding, profile-validation, adapter-test, coverage, and unattended-operation gaps were recorded in a temporary report before repository changes.
+- **Validation evidence:** The untouched wheel/sdist built and installed from wheel; 46 baseline tests passed at 84% coverage; Ruff and strict mypy passed.
+- **Unresolved issue:** Dedicated dependency and secret scanners still required final execution.
+- **Rollback state:** The audit phase was read-only and temporary artifacts remained outside the repository.
+- **Next bounded step:** Harden on `audit/v0.1.1` without OCI calls.
+
+## 2026-07-13T17:20:00-07:00 — v0.1.1 safety hardening
+
+- **Objective:** Remove ambiguous duplicate-launch risk while keeping the controller small and every process bounded.
+- **Action:** Implemented one logical 24-hour retry token persisted before submission, reuse after transient/unknown ambiguity, cleanup after definitive outcomes/expiry, fail-closed corrupt state, and a fresh token after definitive capacity rejection. Added offline profile/key validation, fake-SDK production-adapter tests, first-time OCI onboarding, and dry-run oneshot/timer examples.
+- **Result:** No OCI resource, credential, IAM policy, service, or host installation was read or changed. The current conservative 2/12 profile and historical/account-specific 4/24 profile are explicitly separated.
+- **Validation evidence:** Local tests passed above the 90% threshold with 100% controller line coverage; systemd examples passed syntax validation through a non-installing temporary executable substitution.
+- **Unresolved issue:** The first dependency audit found vulnerable clean-room bootstrap pip and a vulnerable pytest selected by the old dev upper bound; both required bounded dependency-tooling updates before publication.
+- **Rollback state:** Changes are isolated to branch `audit/v0.1.1` and can be reverted without cloud or host rollback.
+- **Next bounded step:** Complete clean-room/security validation, push only this branch, and open a draft PR.

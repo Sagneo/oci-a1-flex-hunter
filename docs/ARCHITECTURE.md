@@ -50,5 +50,6 @@ A duplicate match requires the configured display name and the free-form tag key
 
 ## Idempotency and concurrency
 
-Each launch call supplies an SDK retry token. The local lock prevents concurrent processes on one host, and the cloud-side display-name/tag lookup runs before every attempt. Multi-host coordination is not provided.
+Oracle documents `opc_retry_token` as the identity of one request retry, with a 24-hour lifetime, so a timeout or server error can be retried without executing the action twice. The controller creates one token for a logical launch, writes it before submission, and reuses it after ambiguous transient failures and bounded process restarts. A definitive `OutOfHostCapacity` response clears the intent; an unknown failure retains it. A valid expired token is discarded only after the next preflight duplicate lookup; malformed, incomplete, or future-dated intent state fails closed. Successful, duplicate, and definitive fatal outcomes clean up the token.
 
+The token is a random non-secret request identifier, stored in the mode-`0600` state file but redacted from `status` output. The local lock prevents concurrent processes on one host, and the cloud-side display-name/tag lookup runs before every attempt. Multi-host coordination is not provided.

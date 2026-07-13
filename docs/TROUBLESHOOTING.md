@@ -1,5 +1,7 @@
 # Troubleshooting
 
+For initial credentials, identifiers, IAM planning, and validation order, start with [OCI onboarding](OCI_SETUP.md).
+
 ## Configuration error
 
 Run `validate-config`. Confirm every required variable is present, numeric ranges are positive, delay ordering is valid, names use the safe format, and referenced local files exist. Error output intentionally omits sensitive values.
@@ -30,5 +32,4 @@ Check state-directory ownership, permissions, free space, and JSON integrity. Th
 
 ## Unexpected restart
 
-Review the unit's restart policy and exit status. The sample unit prevents restart for all expected application outcomes and restarts only unexpected failures within systemd start limits.
-
+Review the one-shot unit result and paired timer schedule. Retry exhaustion ends that bounded run; the timer schedules a later fresh process. Confirm that each target instance uses a distinct protected environment and state directory.

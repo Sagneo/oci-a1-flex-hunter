@@ -17,7 +17,7 @@ As reviewed on 2026-07-13, Oracle's specific [Always Free Resources](https://doc
 - Duplicate identity requires both a stable display name and project tag.
 - Sequential, bounded retries with configurable jitter.
 - Capacity and transient failures are separated from fatal failures.
-- Local process lock and atomic, sanitized JSON state.
+- Local process lock and atomic, sanitized JSON state with bounded retry-token recovery.
 - Structured console logs with sensitive-value redaction.
 - One-shot and bounded continuous operation.
 - Official OCI Python SDK adapter with fully offline fake-adapter tests.
@@ -25,9 +25,9 @@ As reviewed on 2026-07-13, Oracle's specific [Always Free Resources](https://doc
 
 ## Architecture
 
-The CLI validates configuration and coordinates a controller. The controller owns stop/retry policy and depends on a narrow compute-adapter protocol. Production uses the official OCI SDK; tests use a deterministic fake. Local locking prevents concurrent processes, while an atomic state file records only status, counters, categories, and timestamps.
+The CLI validates configuration and coordinates a controller. The controller owns stop/retry policy and depends on a narrow compute-adapter protocol. Production uses the official OCI SDK; tests use a deterministic fake. Local locking prevents concurrent processes, while an atomic state file records sanitized status plus a non-secret retry intent when an OCI result is ambiguous.
 
-See [Architecture](docs/ARCHITECTURE.md) for the detailed control flow and trust boundaries.
+See [Architecture](docs/ARCHITECTURE.md) for the detailed control flow and trust boundaries. First-time operators should follow [OCI onboarding](docs/OCI_SETUP.md) before configuration.
 
 ## Requirements
 
@@ -63,7 +63,7 @@ OCI authentication is indirect:
 - `OCI_A1_HUNTER_OCI_CONFIG` selects the standard OCI config file.
 - `OCI_A1_HUNTER_OCI_PROFILE` selects the standard profile.
 
-Required project variables identify the compartment, availability domain, subnet, image, display name, SSH public-key file, and project tag. CLI options can override them. See [Configuration](docs/CONFIGURATION.md).
+Required project variables identify the compartment, availability domain, subnet, image, display name, SSH public-key file, and project tag. CLI options can override them. See [OCI onboarding](docs/OCI_SETUP.md) and [Configuration](docs/CONFIGURATION.md).
 
 ## Validate configuration
 
@@ -116,7 +116,7 @@ Status reads only local sanitized state. Add `--refresh` only when an explicit r
 
 ## systemd example
 
-The repository includes [an example unit](examples/oci-a1-flex-hunter.service). It is not installed automatically and deliberately uses `/opt/oci-a1-flex-hunter`, a dedicated non-login user, protected external environment configuration, bounded restart controls, and hardening. Review [Deployment](docs/DEPLOYMENT.md) before adapting it.
+The repository includes a dry-run [one-shot unit](examples/oci-a1-flex-hunter.service) and separate-target [service](examples/oci-a1-flex-hunter@.service)/[timer](examples/oci-a1-flex-hunter@.timer) templates. Nothing is installed automatically. Review [Deployment](docs/DEPLOYMENT.md) before adapting them or deliberately adding `--live`.
 
 ## Safety model
 
@@ -127,7 +127,7 @@ The repository includes [an example unit](examples/oci-a1-flex-hunter.service). 
 - Logs and state exclude request payloads and complete identifiers.
 - The application never stops, resizes, terminates, or modifies an existing instance.
 
-Local locking coordinates only one host. Multiple hosts require external coordination and are outside version 0.1.0.
+Local locking coordinates only one host. Multiple hosts require external coordination and are outside version 0.1.1.
 
 ## Tests and quality checks
 
@@ -155,7 +155,7 @@ See [Troubleshooting](docs/TROUBLESHOOTING.md) for corrective actions.
 
 ## Repository status
 
-Version 0.1.0 is the initial greenfield release. It is suitable for offline evaluation and carefully reviewed manual deployment. Live use remains the operator's responsibility.
+Version 0.1.1 is a review candidate that hardens ambiguous retries, onboarding, wheel validation, and timer-based operation. Live use remains the operator's responsibility.
 
 ## License
 

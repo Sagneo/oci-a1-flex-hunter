@@ -3,7 +3,7 @@
 ## Classification
 
 - Project mode: **Greenfield**
-- Product version: **0.1.0**
+- Product version: **0.1.1 release candidate**
 - Repository target: `Sagneo/oci-a1-flex-hunter`
 - Legacy migration: **Not applicable**
 
@@ -35,12 +35,11 @@ The repository contains a Python 3.11+ CLI with:
 
 ## Release state
 
-Local and remote validation results are recorded chronologically in `PROJECT_LOG.md`. The public release target is `v0.1.0`.
+Local and remote validation results are recorded chronologically in `PROJECT_LOG.md`. The latest published release remains `v0.1.0`; branch `audit/v0.1.1` is a review candidate only.
 
 ## Remaining limitations
 
 - OCI capacity is not guaranteed.
 - Pricing, quota, policy, and zero-cost eligibility are account-specific and time-sensitive.
-- Multi-host coordination is outside version 0.1.0.
+- Multi-host coordination is outside version 0.1.1.
 - A user must prepare valid OCI authentication and existing network/image resources before any manual live run.
-
